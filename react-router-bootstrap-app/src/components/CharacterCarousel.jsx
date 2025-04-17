@@ -14,6 +14,28 @@ export default function CharacterCarousel() {
       .catch((err) => console.error('Failed to fetch characters:', err));
   }, []);
 
+  const handleDelete = (id) => {
+    fetch(`http://127.0.0.1:5000/characters/${id}`, {
+      method: 'DELETE'
+    })
+      .then(() => {
+        setCharacters(prev => prev.filter(char => char.id !== id));
+        setModalMessage('Character deleted successfully!');
+        setIsSuccess(true);
+        setShowModal(true);
+      })
+      .catch(err => {
+        console.error('Failed to delete:', err);
+        setModalMessage('Failed to delete character.');
+        setIsSuccess(false);
+        setShowModal(true);
+      });
+  };
+
+  const handleEditClick = (character) => {
+    navigate(`/edit/${character.id}`); // Navigate to the edit page
+  };
+
   return (
     <section className="character-carousel-section">
       <h2 className="carousel-title">Character Cards</h2>
@@ -23,8 +45,8 @@ export default function CharacterCarousel() {
             <div className="carousel-card-wrapper">
               <SuperheroCard
                 character={character}
-                onEdit={() => {}}
-                onDelete={() => {}}
+                onEdit={handleEditClick}  
+              onDelete={handleDelete}
               />
             </div>
           </Carousel.Item>
