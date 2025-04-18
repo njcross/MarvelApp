@@ -2,16 +2,27 @@
 import { useEffect, useState } from 'react';
 import { Carousel } from 'react-bootstrap';
 import SuperheroCard from './SuperheroCard';
+import { useNavigate } from 'react-router-dom';
+import ConfirmationModal from './ConfirmationModal';
 import './CharacterCarousel.css';
 
 export default function CharacterCarousel() {
   const [characters, setCharacters] = useState([]);
+  const [modalMessage, setModalMessage] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+
+  const navigate = useNavigate();
+
+  const fetchCharacters = () => {
+    fetch('http://127.0.0.1:5000/characters')
+      .then(res => res.json())
+      .then(data => setCharacters(data))
+      .catch(err => console.error('Failed to load characters:', err));
+  };
 
   useEffect(() => {
-    fetch('http://localhost:5000/characters')
-      .then((res) => res.json())
-      .then((data) => setCharacters(data))
-      .catch((err) => console.error('Failed to fetch characters:', err));
+    fetchCharacters();
   }, []);
 
   const handleDelete = (id) => {
@@ -36,7 +47,13 @@ export default function CharacterCarousel() {
     navigate(`/edit/${character.id}`); // Navigate to the edit page
   };
 
+  const handleModalConfirm = () => {
+    setShowModal(false);
+    fetchCharacters(); // Refresh character list
+  };
+
   return (
+    <div className="charactert-carousel-container">
     <section className="character-carousel-section">
       <h2 className="carousel-title">Character Cards</h2>
       <Carousel className="character-carousel" interval={3000} fade>
@@ -53,5 +70,16 @@ export default function CharacterCarousel() {
         ))}
       </Carousel>
     </section>
+
+    <ConfirmationModal
+    show={showModal}
+    title={isSuccess ? 'Success' : 'Error'}
+    message={modalMessage}
+    onHide={() => setShowModal(false)}
+    onConfirm={handleModalConfirm}
+    confirmText="OK"
+    cancelText=""
+  />
+  </div>
   );
 }
